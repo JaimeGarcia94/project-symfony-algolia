@@ -1,0 +1,43 @@
+version: '3.5'
+
+services:
+    php:
+        build:
+            context: .
+            dockerfile: docker/php/Dockerfile
+            args:
+                TIMEZONE: ${TIMEZONE}
+        container_name: movies_php
+        volumes:
+            - .:/var/www/movies/
+        networks:
+            - symfony
+    nginx:
+        build:
+            context: .
+            dockerfile: docker/nginx/Dockerfile
+        container_name: movies_nginx
+        volumes:
+            - .:/var/www/movies/
+        ports:
+            - 80:80
+        networks:
+            - symfony
+    db:
+        build:
+            context: .
+            dockerfile: docker/db/Dockerfile
+        container_name: movies_db
+        volumes:
+            - ./docker/db/data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: 'root'
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+        ports:
+            - 3306:3306
+        networks:
+            - symfony            
+networks:
+    symfony:
