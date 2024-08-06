@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Buscador Angolia{% endblock %}
+
+{% block body %}
+<h1>Search Movies</h1>
+
+<form id="search-form">
+    <input type="text" id="search-input" name="query" placeholder="Search for a movie...">
+    <button type="submit">Search</button>
+</form>
+
+<div id="results"></div>
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript">
+$(document).ready(function(){
+    document.getElementById('search-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var query = document.getElementById('search-input').value;
+
+        if (query) {
+            fetch('/search?query=' + query)
+                .then(response => response.json())
+                .then(data => {
+                    var resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '';
+                    if (data.error) {
+                        resultsDiv.innerHTML = '<p>' + data.error + '</p>';
+                    } else {
+                        if (Array.isArray(data.hits)) {
+                            data.hits.forEach(movie => {
+                                var movieDiv = document.createElement('div');
+                                movieDiv.innerHTML = '<h2>' + movie.title + '</h2>'
+                                    + '<p>' + movie.overview + '</p>'
+                                    + '<p>Release Date: ' + movie.release_date + '</p>'
+                                    + '<p>Budget: ' + movie.budget + '</p>'
+                                    + '<p>idMovie: ' + movie.id + '</p>';
+                                resultsDiv.appendChild(movieDiv);
+                            });
+                        } else {
+                            resultsDiv.innerHTML = '<p>No results found</p>';
+                        }
+                    }
+                });
+        }
+    });
+});
+
+</script>
+{% endblock %}
